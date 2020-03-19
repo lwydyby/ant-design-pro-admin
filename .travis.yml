@@ -20,7 +20,7 @@ branches:
     - master
 
 script:
-  - npm run build:test
+  - npm run build
 
 
 
