@@ -62,7 +62,8 @@ export default {
       const childrenItems = item.children.map(o => {
         return this.renderItem(o, o.key)
       })
-
+      let parentId=item.parentId
+      let id=item.id
       return (
         <ItemGroup key={item.key}>
           <template slot="title">
@@ -70,9 +71,9 @@ export default {
             <a-dropdown>
               <a class="btn"><a-icon type="ellipsis" /></a>
               <a-menu slot="overlay">
-                <a-menu-item key="1">新增</a-menu-item>
-                <a-menu-item key="2">合并</a-menu-item>
-                <a-menu-item key="3">移除</a-menu-item>
+                <a-menu-item key="1"  {...{ on: { click: item => this.$emit('peerAdd', parentId)  } }}>增加同级菜单</a-menu-item>
+                <a-menu-item key="2" {...{ on: { click: item => this.$emit('childAdd', id)  } }}>增加子菜单</a-menu-item>
+                <a-menu-item key="3" {...{ on: { click: item => this.$emit('editSelf', id)  } }}>编辑</a-menu-item>
               </a-menu>
             </a-dropdown>
           </template>

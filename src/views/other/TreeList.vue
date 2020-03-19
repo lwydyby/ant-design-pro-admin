@@ -6,151 +6,162 @@
           :dataSource="orgTree"
           :openKeys.sync="openKeys"
           :search="true"
+          @editSelf="editSelf"
+          @peerAdd="handlePeerAdd"
+          @childAdd="handleChildAdd"
           @click="handleClick"
           @add="handleAdd"
           @titleClick="handleTitleClick"></s-tree>
       </a-col>
       <a-col :span="19">
-        <s-table
-          ref="table"
-          size="default"
-          :columns="columns"
-          :data="loadData"
-          :alert="false"
-          :rowSelection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
-        >
-          <span slot="action" slot-scope="text, record">
-            <template v-if="$auth('table.update')">
-              <a @click="handleEdit(record)">编辑</a>
-              <a-divider type="vertical" />
-            </template>
-            <a-dropdown>
-              <a class="ant-dropdown-link">
-                更多 <a-icon type="down" />
-              </a>
-              <a-menu slot="overlay">
-                <a-menu-item>
-                  <a href="javascript:;">详情</a>
-                </a-menu-item>
-                <a-menu-item v-if="$auth('table.disable')">
-                  <a href="javascript:;">禁用</a>
-                </a-menu-item>
-                <a-menu-item v-if="$auth('table.delete')">
-                  <a href="javascript:;">删除</a>
-                </a-menu-item>
-              </a-menu>
-            </a-dropdown>
-          </span>
-        </s-table>
+        <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
+          <a-form @submit="handleSubmit">
+            <a-form-item
+              label="菜单标志"
+              :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+              :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+              <a-input
+                v-model="form.permissionId"
+                name="permissionId"
+                placeholder="菜单标志"/>
+            </a-form-item>
+            <a-form-item
+              label="菜单名称"
+              :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+              :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+              <a-input
+               v-model="form.permissionName"
+                name="permissionName"
+                placeholder="菜单名称"/>
+            </a-form-item>
+            <a-form-item
+              label="类型"
+              :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+              :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+              <a-select  style="width: 120px"  v-model="form.type" name="type">
+                <a-select-option value=1>菜单</a-select-option>
+                <a-select-option value=2>功能</a-select-option>
+              </a-select>
+            </a-form-item>
+            <a-form-item
+              label="排序"
+              :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+              :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+              <a-input-number id="inputNumber" name="sort" :min="1" :max="100" v-model="form.sort"/>
+            </a-form-item>
+            <a-form-item
+              :wrapperCol="{ span: 24 }"
+              style="text-align: center"
+            >
+              <a-button htmlType="submit" type="primary">提交</a-button>
+              <a-button style="margin-left: 8px" @click="settingRoute">配置路由</a-button>
+            </a-form-item>
+          </a-form>
+        </a-card>
       </a-col>
     </a-row>
 
-    <org-modal ref="modal" @ok="handleSaveOk" @close="handleSaveClose" />
+    <org-modal ref="modal" @ok="handleSaveOk" @close="handleSaveClose"/>
+    <route-modal ref="routeModal" @ok="handleSaveRouteOk" @close="handleSaveRouteClose"/>
   </a-card>
 </template>
 
 <script>
-import STree from '@/components/Tree/Tree'
-import { STable } from '@/components'
-import OrgModal from './modules/OrgModal'
-import { getOrgTree, getServiceList } from '@/api/manage'
+  import STree from '@/components/Tree/Tree'
+  import {STable} from '@/components'
+  import OrgModal from './modules/OrgModal'
+  import RouteModal from './modules/RouteModal'
+  import {getOrgTree, getMenuInfo,saveMenu} from '@/api/manage'
 
-export default {
-  name: 'TreeList',
-  components: {
-    STable,
-    STree,
-    OrgModal
-  },
-  data () {
-    return {
-      openKeys: ['key-01'],
+  export default {
+    name: 'TreeList',
+    components: {
+      STable,
+      STree,
+      OrgModal,
+      RouteModal
+    },
+    data() {
+      return {
+        openKeys: [],
+        // 查询参数
+        queryParam: {},
+        orgTree: [],
+        selectedRowKeys: [],
+        selectedRows: [],
+        form: {
+          id: null,
+          permissionId: null,
+          permissionName: null,
+          type: null,
+          sort: 1
+        },
 
-      // 查询参数
-      queryParam: {},
-      // 表头
-      columns: [
-        {
-          title: '#',
-          dataIndex: 'no'
-        },
-        {
-          title: '成员名称',
-          dataIndex: 'description'
-        },
-        {
-          title: '登录次数',
-          dataIndex: 'callNo',
-          sorter: true,
-          needTotal: true,
-          customRender: (text) => text + ' 次'
-        },
-        {
-          title: '状态',
-          dataIndex: 'status',
-          needTotal: true
-        },
-        {
-          title: '更新时间',
-          dataIndex: 'updatedAt',
-          sorter: true
-        },
-        {
-          title: '操作',
-          dataIndex: 'action',
-          width: '150px',
-          scopedSlots: { customRender: 'action' }
-        }
-      ],
-      // 加载数据方法 必须为 Promise 对象
-      loadData: parameter => {
-        return getServiceList(Object.assign(parameter, this.queryParam))
-          .then(res => {
-            return res.result
-          })
-      },
-      orgTree: [],
-      selectedRowKeys: [],
-      selectedRows: []
-    }
-  },
-  created () {
-    getOrgTree().then(res => {
-      this.orgTree = res.result
-    })
-  },
-  methods: {
-    handleClick (e) {
-      console.log('handleClick', e)
-      this.queryParam = {
-        key: e.key
       }
-      this.$refs.table.refresh(true)
     },
-    handleAdd (item) {
-      console.log('add button, item', item)
-      this.$message.info(`提示：你点了 ${item.key} - ${item.title} `)
-      this.$refs.modal.add(item.key)
+    created() {
+      this.getTree()
     },
-    handleTitleClick (item) {
-      console.log('handleTitleClick', item)
-    },
-    titleClick (e) {
-      console.log('titleClick', e)
-    },
-    handleSaveOk () {
+    methods: {
+      getTree () {
+        getOrgTree().then(res => {
+          this.orgTree = res.result
+        })
+      },
+      editSelf(item){
+        this.handleClick({key:item})
+      },
+      handleClick (e) {
+        this.queryParam = {
+          id: e.key
+        }
+        getMenuInfo(this.queryParam).then(res => {
+          let data=res.result
 
-    },
-    handleSaveClose () {
+          this.form.id = data.id;
+          this.form.permissionId = data.permissionId;
+          this.form.permissionName = data.permissionName;
+          this.form.sort = data.sort;
+          this.form.route=data.route
+          this.form.type = data.type+"";
+        })
+      },
+      settingRoute() {
+        this.$refs.routeModal.add(this.form.route)
+      },
+      handleSubmit(){
+        saveMenu(Object.assign({}, this.form)).then(res=>{
+          this.$message.success('保存成功')
+          this.getTree();
+        })
+      },
+      handleAdd (item) {
+        this.$refs.modal.add(item.key)
+      },
+      handlePeerAdd(item){
+        this.$refs.modal.add(item)
+      },
+      handleChildAdd(item){
+        this.$refs.modal.add(item)
+      },
+      handleTitleClick (item) {
+        console.log(item)
+      },
+      titleClick (e) {
+        console.log(e)
+      },
+      handleSaveOk () {
+        this.getTree();
+      },
+      handleSaveClose () {
+      },
+      handleSaveRouteOk () {
+      },
+      handleSaveRouteClose () {
 
-    },
-
-    onSelectChange (selectedRowKeys, selectedRows) {
-      this.selectedRowKeys = selectedRowKeys
-      this.selectedRows = selectedRows
+      }
     }
   }
-}
 </script>
 
 <style lang="less">
@@ -158,6 +169,7 @@ export default {
 
     /deep/ .ant-menu-item-group-title {
       position: relative;
+
       &:hover {
         .btn {
           display: block;
