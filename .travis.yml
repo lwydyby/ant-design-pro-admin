@@ -1,7 +1,30 @@
+
 language: node_js
+
 node_js:
-  - 10.15.0
-cache: yarn
+  - "8"
+
+sudo: true
+
+services:
+  - docker
+
+cache:
+  directories:
+    - "node_modules"
+
+install: npm install
+
+branches:
+  only:
+    - master
+
 script:
-  - yarn
-  - yarn run lint --no-fix && yarn run build
+  - npm run build:test
+
+
+
+after_success:
+  - docker build -t $DOCKER_PROGRAM .
+  - docker login  -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+  - docker push $DOCKER_PROGRAM
