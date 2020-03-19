@@ -71,14 +71,14 @@
         </a-tab-pane>
       </a-tabs>
 
-      <a-form-item>
-        <a-checkbox v-decorator="['rememberMe', { valuePropName: 'checked' }]">自动登录</a-checkbox>
-        <router-link
-          :to="{ name: 'recover', params: { user: 'aaa'} }"
-          class="forge-password"
-          style="float: right;"
-        >忘记密码</router-link>
-      </a-form-item>
+<!--      <a-form-item>-->
+<!--        <a-checkbox v-decorator="['rememberMe', { valuePropName: 'checked' }]">自动登录</a-checkbox>-->
+<!--        <router-link-->
+<!--          :to="{ name: 'recover', params: { user: 'aaa'} }"-->
+<!--          class="forge-password"-->
+<!--          style="float: right;"-->
+<!--        >忘记密码</router-link>-->
+<!--      </a-form-item>-->
 
       <a-form-item style="margin-top:24px">
         <a-button
@@ -91,19 +91,19 @@
         >确定</a-button>
       </a-form-item>
 
-      <div class="user-login-other">
-        <span>其他登录方式</span>
-        <a>
-          <a-icon class="item-icon" type="alipay-circle"></a-icon>
-        </a>
-        <a>
-          <a-icon class="item-icon" type="taobao-circle"></a-icon>
-        </a>
-        <a>
-          <a-icon class="item-icon" type="weibo-circle"></a-icon>
-        </a>
-        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>
-      </div>
+<!--      <div class="user-login-other">-->
+<!--        <span>其他登录方式</span>-->
+<!--        <a>-->
+<!--          <a-icon class="item-icon" type="alipay-circle"></a-icon>-->
+<!--        </a>-->
+<!--        <a>-->
+<!--          <a-icon class="item-icon" type="taobao-circle"></a-icon>-->
+<!--        </a>-->
+<!--        <a>-->
+<!--          <a-icon class="item-icon" type="weibo-circle"></a-icon>-->
+<!--        </a>-->
+<!--        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>-->
+<!--      </div>-->
     </a-form>
 
     <two-step-captcha
@@ -192,6 +192,7 @@ export default {
           delete loginParams.username
           loginParams[!state.loginType ? 'email' : 'username'] = values.username
           loginParams.password = md5(values.password)
+          loginParams.loginType = state.loginType
           Login(loginParams)
             .then((res) => this.loginSuccess(res))
             .catch(err => this.requestFailed(err))
