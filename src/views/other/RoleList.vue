@@ -44,6 +44,9 @@
           </a-col>
         </a-row>
       </div>
+      <span slot="createTime" slot-scope="text, record">
+        {{record.createTime | dayjs}}
+      </span>
       <span slot="action" slot-scope="text, record">
         <a @click="handleEdit(record)">编辑</a>
         <a-divider type="vertical"/>
@@ -161,33 +164,13 @@
         },
         // 表头
         columns: [
-          {
-            title: '唯一识别码',
-            dataIndex: 'id'
-          },
-          {
-            title: '角色名称',
-            dataIndex: 'name'
-          },
-          {
-            title: '状态',
-            dataIndex: 'status'
-          },
-          {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            sorter: true
-          }, {
-            title: '操作',
-            width: '150px',
-            dataIndex: 'action',
-            scopedSlots: {customRender: 'action'}
-          }
         ],
         // 加载数据方法 必须为 Promise 对象
         loadData: parameter => {
           return getRoleList(Object.assign(parameter, this.queryParam))
             .then(res => {
+              console.log(res)
+              this.columns=res.result.columns
               return res.result
             })
         },

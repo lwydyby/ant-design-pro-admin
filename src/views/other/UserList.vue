@@ -4,7 +4,7 @@
       <a-form layout="inline">
         <a-row :gutter="48">
           <a-col :md="8" :sm="24">
-            <a-form-item label="用户名称" >
+            <a-form-item label="用户名称">
               <a-input placeholder="请输入" v-model="queryParam.name"/>
             </a-form-item>
           </a-col>
@@ -26,6 +26,9 @@
       :columns="columns"
       :data="loadData"
     >
+      <span slot="createTime" slot-scope="text, record">
+        {{record.createTime | dayjs}}
+      </span>
       <span slot="action" slot-scope="text, record">
         <a @click="handleEdit(record)">编辑</a>
         <a-divider type="vertical"/>
@@ -55,7 +58,7 @@
       v-model="visible"
       @ok="handleOk"
     >
-      <a-form  ref="form" :autoFormCreate="(form)=>{this.form = form}">
+      <a-form ref="form" :autoFormCreate="(form)=>{this.form = form}">
 
         <a-form-item
           :labelCol="labelCol"
@@ -105,8 +108,8 @@
           label="角色"
           hasFeedback
         >
-          <a-select v-model="mdl.roleId" style="width: 120px" >
-            <a-select-option v-for="item in roles" :key="item.id" >{{item.name}}</a-select-option>
+          <a-select v-model="mdl.roleId" style="width: 120px">
+            <a-select-option v-for="item in roles" :key="item.id">{{item.name}}</a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item
@@ -122,8 +125,6 @@
         </a-form-item>
 
 
-
-
       </a-form>
     </a-modal>
 
@@ -132,7 +133,7 @@
 
 <script>
   import {STable} from '@/components'
-  import {getUserList, saveUser,deleteUser,enableUser,disableUser,getAllRole} from '@/api/manage'
+  import {getUserList, saveUser, deleteUser, enableUser, disableUser, getAllRole} from '@/api/manage'
 
 
   export default {
@@ -158,45 +159,16 @@
         advanced: false,
         // 查询参数
         queryParam: {
-          name:null
+          name: null
         },
         // 表头
         columns: [
-          {
-            title: '唯一识别码',
-            dataIndex: 'id'
-          },
-          {
-            title: '用户名',
-            dataIndex: 'name'
-          },
-          {
-            title: '邮箱',
-            dataIndex: 'email'
-          },
-          {
-            title: '手机号',
-            dataIndex: 'phone'
-          },
-          {
-            title: '状态',
-            dataIndex: 'status'
-          },
-          {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            sorter: true
-          }, {
-            title: '操作',
-            width: '150px',
-            dataIndex: 'action',
-            scopedSlots: {customRender: 'action'}
-          }
         ],
         // 加载数据方法 必须为 Promise 对象
         loadData: parameter => {
           return getUserList(Object.assign(parameter, this.queryParam))
             .then(res => {
+              this.columns=res.result.columns
               return res.result
             })
         },
@@ -207,34 +179,34 @@
       }
     },
     created() {
-      getAllRole().then(res=>{
-        this.roles=res.result
+      getAllRole().then(res => {
+        this.roles = res.result
       })
     },
     methods: {
-      create(){
+      create() {
         this.visible = true
-        this.mdl={}
+        this.mdl = {}
       },
       handleEdit(record) {
         this.mdl = Object.assign({}, record)
-        this.mdl.roleId=record.role.id
+        this.mdl.roleId = record.role.id
         this.visible = true
       },
-      handleDisable(record){
-        disableUser({id:record.id}).then(res=>{
+      handleDisable(record) {
+        disableUser({id: record.id}).then(res => {
           this.$message.success('禁用成功')
           this.$refs.table.refresh(true)
         })
       },
-      handleEnable(record){
-        enableUser({id:record.id}).then(res=>{
+      handleEnable(record) {
+        enableUser({id: record.id}).then(res => {
           this.$message.success('启用成功')
           this.$refs.table.refresh(true)
         })
       },
-      handleDelete(record){
-        deleteUser({id:record.id}).then(res=>{
+      handleDelete(record) {
+        deleteUser({id: record.id}).then(res => {
           this.$message.success('删除成功')
           this.$refs.table.refresh(true)
         })
